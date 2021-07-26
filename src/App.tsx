@@ -6,12 +6,14 @@
 import "./App.scss";
 
 import { BrowserAuthorizationClientConfiguration } from "@bentley/frontend-authorization-client";
-import { IModelApp } from "@bentley/imodeljs-frontend";
+import { IModelApp, IModelConnection, ScreenViewport } from "@bentley/imodeljs-frontend";
 import { Viewer } from "@itwin/web-viewer-react";
 import React, { useEffect, useState } from "react";
 
 import { Header } from "./Header";
 import { history } from "./history";
+import { myCustomDecorator } from "./components/decorator/myCustomDecorator";
+import { myCustomGeoDataAPI } from "./myCustomGeoDataAPI";
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(
@@ -106,6 +108,17 @@ const App: React.FC = () => {
     });
   };
 
+  const iModelConnected = async (_imodel : IModelConnection)=>{
+    console.log("hello world");
+
+  await  IModelApp.viewManager.onViewOpen.addOnce(async (vp:ScreenViewport)=>{
+      console.log(await myCustomGeoDataAPI.getData());
+      IModelApp.viewManager.addDecorator(new myCustomDecorator(vp));
+    });
+   
+    return;
+  }
+
   return (
     <div className="viewer-container">
       <Header
@@ -121,6 +134,7 @@ const App: React.FC = () => {
           iModelId={iModelId}
           authConfig={{ config: authConfig }}
           onIModelAppInit={onIModelAppInit}
+          onIModelConnected = {iModelConnected}
         />
       )}
     </div>
